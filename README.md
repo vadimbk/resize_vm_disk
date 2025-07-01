@@ -1,43 +1,40 @@
 # expand-lvm-disk
 
-A minimalistic script to automatically expand the root LVM volume in a Debian/Ubuntu virtual machine after increasing the virtual disk size.
+This script automatically expands the root LVM disk in a Debian/Ubuntu virtual machine **after increasing the disk size in your hypervisor or control panel**.
 
 ## Description
 
-This script resizes the last partition on `/dev/sda`, updates the partition table, resizes the LVM physical volume, extends the root logical volume, and grows the filesystem (ext4 or xfs). It also reduces the reserved space on ext4 filesystems to 1% for maximum usable capacity.
+expand-lvm-disk resizes the last partition on `/dev/sda`, updates the partition table, resizes the LVM physical volume, extends the root logical volume, and grows the filesystem (ext4 or xfs). It also reduces reserved blocks on ext4 filesystems to 1% to maximize usable disk space.
 
 ## Prerequisites
 
-- Debian 10/11/12 or Ubuntu 18.04+.
-- The root filesystem must reside on LVM in the last partition of `/dev/sda`.
+- Debian 10/11/12 or Ubuntu 18.04 or later.
+- Root filesystem on LVM in the last partition of `/dev/sda`.
 - Root privileges.
 
 ## Usage
 
-1. Increase the size of your VM disk in your hypervisor (e.g., Proxmox, VMware, VirtualBox).
-2. Copy the script to your VM:
+1. **Increase the size of your VM disk in your hypervisor/control panel.**
+2. Upload the script to your VM.
+3. Make it executable:
     ```bash
-    chmod +x expand-lvm-disk.sh
-    sudo ./expand-lvm-disk.sh
+    chmod +x expand-lvm-disk
     ```
-3. The script will:
-    - Resize the last partition to use the full disk size.
-    - Update the kernel partition table.
-    - Resize the LVM physical volume.
-    - Extend the root logical volume to use all available space.
-    - Resize the root filesystem.
-
-4. Verify the new available space:
+4. Run the script as root:
+    ```bash
+    sudo ./expand-lvm-disk
+    ```
+5. Verify the new disk space:
     ```bash
     df -h
     ```
 
 ## Limitations
 
-- The script only supports VMs using `/dev/sda` with root on LVM in the last partition.
-- It does not support complex setups with multiple disks, encrypted partitions, or separate /boot partitions outside of the LVM.
-- Always back up important data before resizing disks.
+- Only works with `/dev/sda` where the root filesystem resides on LVM in the last partition.
+- Does not support complex partition layouts, multiple disks, encrypted volumes, or separate non-LVM root filesystems.
+- Always create a backup before modifying disk partitions.
 
 ## Disclaimer
 
-Use at your own risk. The author assumes no responsibility for data loss or system issues resulting from the use of this script.
+Use this script at your own risk. The author assumes no responsibility for data loss or system issues resulting from its use.

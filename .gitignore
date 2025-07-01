@@ -1,0 +1,26 @@
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Editor swap/backup files
+*~
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Shell history
+.bash_history
+
+# Build artifacts (if any scripts produce them)
+*.out
+*.tmp
+
+# Archives
+*.tar
+*.gz
+*.zip
+
+# Miscellaneous
+.env

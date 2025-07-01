@@ -17,8 +17,8 @@ This script resizes the last partition on `/dev/sda`, updates the partition tabl
 1. Increase the size of your VM disk in your hypervisor (e.g., Proxmox, VMware, VirtualBox).
 2. Copy the script to your VM:
     ```bash
-    chmod +x expand-lvm.sh
-    sudo ./expand-lvm.sh
+    chmod +x expand-lvm-disk.sh
+    sudo ./expand-lvm-disk.sh
     ```
 3. The script will:
     - Resize the last partition to use the full disk size.

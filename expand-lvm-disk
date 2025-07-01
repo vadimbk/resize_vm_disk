@@ -1,0 +1,53 @@
+#!/bin/bash
+set -e
+
+# expand-lvm-disk
+#
+# This script should be run **after you have increased the VM disk size in your hypervisor or control panel**.
+# It automatically resizes the root LVM disk in a Debian/Ubuntu VM.
+
+# Check for root privileges
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root!"
+  exit 1
+fi
+
+# Find the disk and the last partition
+DISK="/dev/sda"
+LAST_PART_NUM=$(parted -m $DISK unit s print | tail -n 1 | cut -d: -f1)
+PART="${DISK}${LAST_PART_NUM}"
+
+echo "[+] Last partition: $PART"
+
+# Resize the last partition to fill the disk
+parted $DISK resizepart $LAST_PART_NUM 100%
+
+# Re-read partition table
+partprobe $DISK
+udevadm settle
+
+# Resize the LVM physical volume
+pvresize $PART
+
+# Detect the root logical volume path
+LV_PATH=$(df / | tail -1 | awk '{print $1}')
+
+# Extend the logical volume to use all free space
+lvextend -l +100%FREE $LV_PATH
+
+# Detect filesystem type
+FS_TYPE=$(blkid -o value -s TYPE $LV_PATH)
+
+if [ "$FS_TYPE" == "ext4" ]; then
+    resize2fs $LV_PATH
+    echo "[+] Reducing root reserved blocks to 1%..."
+    tune2fs -m 1 $LV_PATH
+elif [ "$FS_TYPE" == "xfs" ]; then
+    xfs_growfs /
+else
+    echo "Unknown filesystem type: $FS_TYPE"
+    exit 1
+fi
+
+echo "Done! Final disk usage:"
+df -h
